@@ -16,33 +16,33 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace APICarreteras.Controller
+
+namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CantonController : ControllerBase
+    public class TipoDeViaController : ControllerBase
     {
-        private readonly ILogger<CantonController> _logger;
-        private readonly ICantonRepositorio _cantonRepo;
+        private readonly ILogger<TipoDeViaController> _logger;
+        private readonly ITipoDeViaRepositorio _tipodeviaRepo;
         private readonly IMapper _mapper;
         protected Response _response;
-        public CantonController(ILogger<CantonController> logger, ICantonRepositorio cantonRepo, IMapper mapper)
+        public TipoDeViaController(ILogger<TipoDeViaController> logger, ITipoDeViaRepositorio tipodeviaRepo, IMapper mapper)
         {
             _logger = logger;
-            _cantonRepo = cantonRepo;
+            _tipodeviaRepo = tipodeviaRepo;
             _mapper = mapper;
             _response = new();
         }
-
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetCantones()
+        public async Task<ActionResult<Models.Response>> GetCantones()
         {
             try
             {
-                _logger.LogInformation("Obtener los Cantones");
-                IEnumerable<Canton> cantonList = await _cantonRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<CantonDto>>(cantonList);
+                _logger.LogInformation("Obtener los TiposDeVia");
+                IEnumerable<TipoDeVium> tipoDeViaList = await _tipodeviaRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<TipoDeVium>>(tipoDeViaList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -55,31 +55,31 @@ namespace APICarreteras.Controller
 
         }
 
-        [HttpGet("{id:int}", Name = "GetCanton")]
+        [HttpGet("{id:int}", Name = "GetTipoDeVia")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetCanton(int id)
+        public async Task<ActionResult<Response>> GetTipoDeVia(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer Villa con Id " + id);
+                    _logger.LogError("Error al traer Tipo de via con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var canton = await _cantonRepo.Obtener(c => c.IdCanton == id);
-                if (canton == null)
+                var tipodevia = await _tipodeviaRepo.Obtener(c => c.IdTipoVia == id);
+                if (tipodevia == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<CantonDto>(canton);
+                _response.Resultado = _mapper.Map<TipoDeViaDto>(tipodevia);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -92,19 +92,13 @@ namespace APICarreteras.Controller
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
-
-
-
-
-
-
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearCanton([FromBody] CantonCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearTipoDeVia([FromBody] TipoDeViaCreateDto createDto)
         {
             try
             {
@@ -118,22 +112,22 @@ namespace APICarreteras.Controller
                     return BadRequest(ModelState);
                 }
 
-                var existingCanton = await _cantonRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
+                var existingCanton = await _tipodeviaRepo.Obtener(v => v.TipoDeVia.ToLower() == createDto.TipoDeVia.ToLower());
                 if (existingCanton != null)
                 {
-                    ModelState.AddModelError("NombreExiste", "El cantón con ese nombre ya existe.");
+                    ModelState.AddModelError("NombreExiste", "El tipo de via con ese nombre ya existe.");
                     return BadRequest(ModelState);
                 }
 
-                Canton modelo = _mapper.Map<Canton>(createDto);
+                TipoDeVium modelo = _mapper.Map<TipoDeVium>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
-                await _cantonRepo.Crear(modelo);
+                await _tipodeviaRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetCanton", new { id = modelo.IdCanton }, _response);
+                return CreatedAtRoute("GetTipoDeVia", new { id = modelo.IdTipoVia }, _response);
             }
             catch (Exception ex)
             {
@@ -150,7 +144,7 @@ namespace APICarreteras.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<IActionResult> DeleteCanton(int id)
+        public async Task<IActionResult> DeleteTipoDeVia(int id)
         {
             try
             {
@@ -160,14 +154,14 @@ namespace APICarreteras.Controller
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var villa = await _cantonRepo.Obtener(v => v.IdCanton == id);
-                if (villa == null)
+                var tipodevia = await _tipodeviaRepo.Obtener(v => v.IdTipoVia == id);
+                if (tipodevia == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _cantonRepo.Remover(villa);
+                await _tipodeviaRepo.Remover(tipodevia);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -180,20 +174,21 @@ namespace APICarreteras.Controller
             }
         }
 
+
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateCanton(int id, [FromBody] CantonUpdateDto updateDto)
+        public async Task<IActionResult> UpdateTipoDeVia(int id, [FromBody] TipoDeViaUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdCanton)
+            if (updateDto == null || id != updateDto.IdTipoVia)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
                 return BadRequest(_response);
             }
 
-            Canton modelo = _mapper.Map<Canton>(updateDto);
-            await _cantonRepo.Actualizar(modelo);
+            TipoDeVium modelo = _mapper.Map<TipoDeVium>(updateDto);
+            await _tipodeviaRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
@@ -201,28 +196,34 @@ namespace APICarreteras.Controller
         [HttpPatch("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdatePartialCanton(int id, JsonPatchDocument<CantonUpdateDto> patchDto)
+        public async Task<IActionResult> UpdatePartialTipoDeVia(int id, JsonPatchDocument<TipoDeViaUpdateDto> patchDto)
         {
             if (patchDto == null || id == 0)
             {
                 return BadRequest();
             }
-            var canton = await _cantonRepo.Obtener(v => v.IdCanton == id, tracked: false);
-            if (canton == null) return BadRequest();
-            CantonUpdateDto cantonDto = _mapper.Map<CantonUpdateDto>(canton);
+            var tipodevia = await _tipodeviaRepo.Obtener(v => v.IdTipoVia == id, tracked: false);
+            if (tipodevia == null) return BadRequest();
+            TipoDeViaUpdateDto TipoDeviaDto = _mapper.Map<TipoDeViaUpdateDto>(tipodevia);
 
-            patchDto.ApplyTo(cantonDto, ModelState);
+            patchDto.ApplyTo(TipoDeviaDto, ModelState);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Canton modelo = _mapper.Map<Canton>(cantonDto);
-            await _cantonRepo.Actualizar(modelo);
+            TipoDeVium modelo = _mapper.Map<TipoDeVium>(TipoDeviaDto);
+            await _tipodeviaRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
 
 
+
     }
+
+
+
+
+
 }

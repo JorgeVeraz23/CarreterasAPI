@@ -16,6 +16,10 @@ namespace APICarreteras
             CreateMap<Canton, CantonCreateDto>().ReverseMap();
             CreateMap<CantonUpdateDto, Canton>().ReverseMap();
 
+            CreateMap<TipoDeVium, TipoDeViaDto>().ReverseMap();
+            CreateMap<TipoDeVium, TipoDeViaCreateDto>().ReverseMap();
+            CreateMap<TipoDeVium, TipoDeViaUpdateDto>().ReverseMap();
+
             
 
         }

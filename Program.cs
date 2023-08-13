@@ -31,6 +31,7 @@ builder.Services.AddDbContext<RedesVialesDbContext>(options =>
 
 // Registra el repositorio
 builder.Services.AddScoped<ICantonRepositorio, CantonRepositorio>();
+builder.Services.AddScoped<ITipoDeViaRepositorio, TipoDeViaRepositorio>();
 
 var app = builder.Build();
 

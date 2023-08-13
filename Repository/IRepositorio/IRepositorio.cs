@@ -2,7 +2,7 @@
 
 namespace APICarreteras.Repository.IRepositorio
 {
-    public interface CantonRepositorio<T> where T : class
+    public interface IRepositorio<T> where T : class
     {
 
         Task Crear(T entidad);

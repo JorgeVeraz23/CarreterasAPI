@@ -8,7 +8,7 @@ using APICarreteras.Repository.IRepositorio;
 
 namespace APICarreteras.Repository
 {
-    public class Repositorio<T> : CantonRepositorio<T> where T : class
+    public class Repositorio<T> : IRepositorio<T> where T : class
     {
 
         private readonly RedesVialesDbContext _db;

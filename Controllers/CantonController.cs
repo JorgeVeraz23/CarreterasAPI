@@ -36,13 +36,13 @@ namespace APICarreteras.Controller
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetVillas()
+        public async Task<ActionResult<Response>> GetCantones()
         {
             try
             {
-                _logger.LogInformation("Obtener las Villas");
-                IEnumerable<Canton> villaList = await _cantonRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<CantonDto>>(villaList);
+                _logger.LogInformation("Obtener los Cantones");
+                IEnumerable<Canton> cantonList = await _cantonRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<CantonDto>>(cantonList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -52,6 +52,99 @@ namespace APICarreteras.Controller
                 _response.ErrorMessages = new List<string> { ex.ToString() };
             }
             return _response;
+
+        }
+
+        [HttpGet("{id:int}", Name = "GetCanton")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<APIResponse>> GetCanton(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    _logger.LogError("Error al traer Villa con Id " + id);
+                    _response.statusCode = HttpStatusCode.BadRequest;
+                    _response.IsExitoso = false;
+                    return BadRequest(_response);
+                }
+
+                var canton = await _cantonRepo.Obtener(c => c.IdCanton == id);
+                if (canton == null)
+                {
+                    _response.statusCode = HttpStatusCode.NotFound;
+                    _response.IsExitoso = false;
+                    return NotFound(_response);
+                }
+
+                _response.Resultado = _mapper.Map<CantonDto>(canton);
+                _response.statusCode = HttpStatusCode.OK;
+
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsExitoso = false;
+                _response.ErrorMessages = new List<string> { ex.ToString() };
+
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+
+
+
+
+
+
+
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CrearCanton([FromBody] CantonCreateDto createDto)
+        {
+            try
+            {
+                if (createDto == null)
+                {
+                    return BadRequest("El objeto createDto es nulo.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var existingCanton = await _cantonRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
+                if (existingCanton != null)
+                {
+                    ModelState.AddModelError("NombreExiste", "El cantón con ese nombre ya existe.");
+                    return BadRequest(ModelState);
+                }
+
+                Canton modelo = _mapper.Map<Canton>(createDto);
+                modelo.FechaCreacion = DateTime.Now;
+                modelo.FechaActualizacion = DateTime.Now;
+
+                await _cantonRepo.Crear(modelo);
+                _response.Resultado = modelo;
+                _response.statusCode = HttpStatusCode.Created;
+
+                return CreatedAtRoute("GetCanton", new { id = modelo.IdCanton }, _response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsExitoso = false;
+                _response.ErrorMessages = new List<string>() { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+
+
+
+
 
         }
 

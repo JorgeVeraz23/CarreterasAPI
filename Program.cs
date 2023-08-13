@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration; // Agrega esta referencia
 using APICarreteras.Repository;
 using APICarreteras.Repository.IRepositorio;
 using APICarreteras;
+using System.Text.Json.Serialization;
+using APICarreteras.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,9 +31,24 @@ builder.Services.AddDbContext<RedesVialesDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
+
+
 // Registra el repositorio
 builder.Services.AddScoped<ICantonRepositorio, CantonRepositorio>();
 builder.Services.AddScoped<ITipoDeViaRepositorio, TipoDeViaRepositorio>();
+builder.Services.AddScoped<ICarreteraRepositorio, CarreteraRepositorio>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NuevaPolitica", app =>
+    {
+        app.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -42,6 +59,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("NuevaPolitica");
 app.UseAuthorization();
 app.MapControllers();
 

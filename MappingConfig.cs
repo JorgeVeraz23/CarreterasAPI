@@ -20,6 +20,10 @@ namespace APICarreteras
             CreateMap<TipoDeVium, TipoDeViaCreateDto>().ReverseMap();
             CreateMap<TipoDeVium, TipoDeViaUpdateDto>().ReverseMap();
 
+            CreateMap<Carretera, CarreteraDto>().ReverseMap();
+            CreateMap<Carretera, CarreteraCreateDto>().ReverseMap();
+            CreateMap<Carretera, CarreteraUpdateDto>().ReverseMap();
+
             
 
         }

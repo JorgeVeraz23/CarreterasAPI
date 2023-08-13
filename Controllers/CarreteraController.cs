@@ -154,6 +154,75 @@ namespace APICarreteras.Controllers
             return _response;
         }
 
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
+        public async Task<IActionResult> DeleteCarretera(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    _response.IsExitoso = false;
+                    _response.statusCode = HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+                var carretera = await _carreteraRepo.Obtener(v => v.IdCarretera == id);
+                if (carretera == null)
+                {
+                    _response.IsExitoso = false;
+                    _response.statusCode = HttpStatusCode.NotFound;
+                    return NotFound(_response);
+                }
+                await _carreteraRepo.Remover(carretera);
+                _response.statusCode = HttpStatusCode.NoContent;
+                return BadRequest(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsExitoso = false;
+                _response.ErrorMessages = new List<string>() { ex.ToString() };
+
+                throw;
+            }
+        }
+
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateCarretera(int id, [FromBody] CarreteraUpdateDto updateDto)
+        {
+            if (updateDto == null || id != updateDto.IdCanton)
+            {
+                _response.IsExitoso = false;
+                _response.statusCode = HttpStatusCode.BadRequest;
+                return BadRequest(_response);
+            }
+
+            if (await _cantonRepositorio.Obtener(v => v.IdCanton == updateDto.IdCanton) == null)
+            {
+                ModelState.AddModelError("ClaveForanea", "El id de la villa no existe");
+                return BadRequest(ModelState);
+            }
+            if (await _tipodeviaRepositorio.Obtener(v => v.IdTipoVia == updateDto.IdTipoVia) == null)
+            {
+                ModelState.AddModelError("ClaveForanea", "El id de la villa no existe");
+                return BadRequest(ModelState);
+            }
+
+            Carretera modelo = _mapper.Map<Carretera>(updateDto);
+            
+            await _carreteraRepo.Actualizar(modelo);
+            _response.statusCode = HttpStatusCode.NoContent;
+            return Ok(_response);
+        }
+
+
+
+
+
 
 
     }

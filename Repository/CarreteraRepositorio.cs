@@ -1,6 +1,5 @@
 ﻿using APICarreteras.Models;
 using APICarreteras.Repository.IRepositorio;
-
 namespace APICarreteras.Repository
 {
     public class CarreteraRepositorio : Repositorio<Carretera>, ICarreteraRepositorio
@@ -14,7 +13,7 @@ namespace APICarreteras.Repository
         {
             entidad.FechaActualizacion = DateTime.Now;
             _db.Carreteras.Update(entidad);
-            await _db.SaveChangesAsync();
+            _db.SaveChangesAsync();
             return entidad;
         }
     }

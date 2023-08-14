@@ -18,6 +18,8 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 // Registra los servicios en el contenedor.
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -29,6 +31,7 @@ builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddDbContext<RedesVialesDbContext>(options =>
 {
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -41,6 +44,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddScoped<ICantonRepositorio, CantonRepositorio>();
 builder.Services.AddScoped<ITipoDeViaRepositorio, TipoDeViaRepositorio>();
 builder.Services.AddScoped<ICarreteraRepositorio, CarreteraRepositorio>();
+builder.Services.AddScoped<ITramoRepositorio, TramoRepositorio>();
 
 builder.Services.AddCors(options =>
 {

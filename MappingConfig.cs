@@ -23,6 +23,10 @@ namespace APICarreteras
             CreateMap<Carretera, CarreteraDto>().ReverseMap();
             CreateMap<Carretera, CarreteraCreateDto>().ReverseMap();
             CreateMap<Carretera, CarreteraUpdateDto>().ReverseMap();
+            
+            CreateMap<Tramo, TramoDto>().ReverseMap();
+            CreateMap<Tramo, TramoCreateDto>().ReverseMap();
+            CreateMap<Tramo, TramoUpdateDto>().ReverseMap();
 
             
 

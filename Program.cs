@@ -45,6 +45,7 @@ builder.Services.AddScoped<ICantonRepositorio, CantonRepositorio>();
 builder.Services.AddScoped<ITipoDeViaRepositorio, TipoDeViaRepositorio>();
 builder.Services.AddScoped<ICarreteraRepositorio, CarreteraRepositorio>();
 builder.Services.AddScoped<ITramoRepositorio, TramoRepositorio>();
+builder.Services.AddScoped<IAlcantarilladoRepositorio, AlcantarilladoRepositorio>();
 
 builder.Services.AddCors(options =>
 {

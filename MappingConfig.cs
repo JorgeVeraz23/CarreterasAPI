@@ -28,6 +28,10 @@ namespace APICarreteras
             CreateMap<Tramo, TramoCreateDto>().ReverseMap();
             CreateMap<Tramo, TramoUpdateDto>().ReverseMap();
 
+            CreateMap<Alcantarillado, AlcantarilladoDto>().ReverseMap();
+            CreateMap<Alcantarillado, AlcantarilladoCreateDto>().ReverseMap();
+            CreateMap<Alcantarillado, AlcantarilladoUpdateDto>().ReverseMap();
+
             
 
         }

@@ -110,7 +110,7 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                if (await _tramoRepositorio.Obtener(v => v.IdTramo == createDto.IdTramo) != null)
+                if (await _tramoRepositorio.Obtener(v => v.Nombre == createDto.Nombre) != null)
                 {
                     ModelState.AddModelError("NombreExiste", "El numero de Tramo con ese Nombre ya existe!");
                     return BadRequest(ModelState);

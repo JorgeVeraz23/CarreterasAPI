@@ -32,6 +32,13 @@ namespace APICarreteras
             CreateMap<Alcantarillado, AlcantarilladoCreateDto>().ReverseMap();
             CreateMap<Alcantarillado, AlcantarilladoUpdateDto>().ReverseMap();
 
+            CreateMap<Accesorio, AccesorioDto>().ReverseMap();
+            CreateMap<Accesorio, AccesorioCreateDto>().ReverseMap();
+            CreateMap<Accesorio, AccesorioUpdateDto>().ReverseMap();
+
+            CreateMap<Puente, PuenteDto>().ReverseMap();   
+            CreateMap<Puente, PuenteCreateDto>().ReverseMap();
+            CreateMap<Puente, PuenteUpdateDto>().ReverseMap();
             
 
         }

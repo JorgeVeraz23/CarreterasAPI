@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using APICarreteras.Models;
 using APICarreteras.Models;
@@ -16,35 +15,35 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-
 namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AlcantarilladoController : ControllerBase
+    public class PuenteController : ControllerBase
     {
-        private readonly ILogger<AlcantarilladoController> _logger;
-        private readonly IAlcantarilladoRepositorio _alcantarilladoRepo;
+        private readonly ILogger<PuenteController> _logger;
+        private readonly IPuenteRepositorio _puenteRepo;
         private readonly IMapper _mapper;
-        private readonly ITramoRepositorio _tramoRepo;
+        private readonly ITramoRepositorio _tramoRepositorio;
         protected Response _response;
-        public AlcantarilladoController(ILogger<AlcantarilladoController> logger, IAlcantarilladoRepositorio alcantarilladoRepo, ITramoRepositorio tramoRepo, IMapper mapper)
+        public PuenteController(ILogger<PuenteController> logger, IPuenteRepositorio puenteRepo, ITramoRepositorio tramoRepositorio, IMapper mapper)
         {
             _logger = logger;
-            _alcantarilladoRepo = alcantarilladoRepo;
-            _tramoRepo = tramoRepo;
+            _puenteRepo = puenteRepo;
+            _tramoRepositorio = tramoRepositorio;
             _mapper = mapper;
             _response = new();
         }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetAlcantarillados()
+        public async Task<ActionResult<Response>> GetPuentes()
         {
             try
             {
-                _logger.LogInformation("Obtener los alcantarillados");
-                IEnumerable<Alcantarillado> alcantarilladoList = await _alcantarilladoRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<AlcantarilladoDto>>(alcantarilladoList);
+                _logger.LogInformation("Obtener los puentes");
+                IEnumerable<Puente> puenteList = await _puenteRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<PuenteDto>>(puenteList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -57,31 +56,31 @@ namespace APICarreteras.Controllers
 
         }
 
-        [HttpGet("{id:int}", Name = "GetAlcantarillado")]
+        [HttpGet("{id:int}", Name = "GetPuente")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetAlcantarillado(int id)
+        public async Task<ActionResult<Response>> GetPuente(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer Alcantarillado con Id " + id);
+                    _logger.LogError("Error al traer Puente con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var alcantarillado = await _alcantarilladoRepo.Obtener(c => c.IdAlcantarillado == id);
-                if (alcantarillado == null)
+                var puente = await _puenteRepo.Obtener(c => c.IdPuente == id);
+                if (puente == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<AlcantarilladoDto>(alcantarillado);
+                _response.Resultado = _mapper.Map<PuenteDto>(puente);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -96,11 +95,12 @@ namespace APICarreteras.Controllers
 
         }
 
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearAlcantarillado([FromBody] AlcantarilladoCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearPuente([FromBody] PuenteCreateDto createDto)
         {
             try
             {
@@ -108,9 +108,14 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-               
+                var existingPuente = await _puenteRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
+                if (existingPuente != null)
+                {
+                    ModelState.AddModelError("NombreExiste", "El puente con ese nombre ya existe.");
+                    return BadRequest(ModelState);
+                }
 
-                if (await _tramoRepo.Obtener(v => v.IdTramo == createDto.IdTramo) == null)
+                if (await _tramoRepositorio.Obtener(v => v.IdTramo == createDto.IdTramo) == null)
                 {
                     ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
                     return BadRequest(ModelState);
@@ -121,16 +126,16 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(createDto);
                 }
-                Alcantarillado modelo = _mapper.Map<Alcantarillado>(createDto);
+                Puente modelo = _mapper.Map<Puente>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
 
-                await _alcantarilladoRepo.Crear(modelo);
+                await _puenteRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetAlcantarillado", new { id = modelo.IdAlcantarillado }, _response);
+                return CreatedAtRoute("GetPuente", new { id = modelo.IdPuente }, _response);
             }
             catch (Exception ex)
             {
@@ -148,7 +153,7 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<IActionResult> DeleteAlcantarillado(int id)
+        public async Task<IActionResult> DeletePuente(int id)
         {
             try
             {
@@ -158,14 +163,14 @@ namespace APICarreteras.Controllers
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var alcantarillado = await _alcantarilladoRepo.Obtener(v => v.IdAlcantarillado == id);
-                if (alcantarillado == null)
+                var puente = await _puenteRepo.Obtener(v => v.IdPuente == id);
+                if (puente == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _alcantarilladoRepo.Remover(alcantarillado);
+                await _puenteRepo.Remover(puente);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -178,36 +183,33 @@ namespace APICarreteras.Controllers
             }
         }
 
+
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateAlcantarillado(int id, [FromBody] AlcantarilladoUpdateDto updateDto)
+        public async Task<IActionResult> UpdatePuente(int id, [FromBody] PuenteUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdAlcantarillado)
+            if (updateDto == null || id != updateDto.IdPuente)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
                 return BadRequest(_response);
             }
 
-            
-            if (await _tramoRepo.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
+           
+            if (await _tramoRepositorio.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
             {
                 ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
                 return BadRequest(ModelState);
             }
-            
+           
 
-            Alcantarillado modelo = _mapper.Map<Alcantarillado>(updateDto);
+            Puente modelo = _mapper.Map<Puente>(updateDto);
 
-            await _alcantarilladoRepo.Actualizar(modelo);
+            await _puenteRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
-
-
-
-
 
     }
 }

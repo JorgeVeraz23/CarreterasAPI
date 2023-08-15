@@ -110,9 +110,10 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                if (await _tramoRepositorio.Obtener(v => v.Nombre == createDto.Nombre) != null)
+                var existingTramo = await _tramoRepositorio.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
+                if (existingTramo != null)
                 {
-                    ModelState.AddModelError("NombreExiste", "El numero de Tramo con ese Nombre ya existe!");
+                    ModelState.AddModelError("NombreExiste", "El tramo con ese nombre ya existe.");
                     return BadRequest(ModelState);
                 }
 
@@ -197,11 +198,7 @@ namespace APICarreteras.Controllers
                 return BadRequest(_response);
             }
 
-            if (await _tramoRepositorio.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
-            {
-                ModelState.AddModelError("ClaveForanea", "El id de tramo no existe");
-                return BadRequest(ModelState);
-            }
+            
             if (await _carreteraRepo.Obtener(v => v.IdCarretera == updateDto.IdCarretera) == null)
             {
                 ModelState.AddModelError("ClaveForanea", "El id de la carretera no existe");

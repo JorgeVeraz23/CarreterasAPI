@@ -111,9 +111,10 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                if (await _carreteraRepo.Obtener(v => v.Nombre == createDto.Nombre) != null)
+                var existingCarretera = await _carreteraRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
+                if (existingCarretera != null)
                 {
-                    ModelState.AddModelError("NombreExiste", "la carretera con ese Nombre ya existe!");
+                    ModelState.AddModelError("NombreExiste", "La carretera con ese nombre ya existe.");
                     return BadRequest(ModelState);
                 }
 
@@ -201,11 +202,8 @@ namespace APICarreteras.Controllers
                 return BadRequest(_response);
             }
 
-            if (await _carreteraRepo.Obtener(v => v.Nombre == updateDto.Nombre) == null)
-            {
-                ModelState.AddModelError("Nombre Existe", "La carretera con ese nombre existe");
-                return BadRequest(ModelState);
-            }
+
+            
             if (await _cantonRepositorio.Obtener(v => v.IdCanton == updateDto.IdCanton) == null)
             {
                 ModelState.AddModelError("ClaveForanea", "El Id de Canton no existe");

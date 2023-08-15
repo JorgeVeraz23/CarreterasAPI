@@ -112,13 +112,6 @@ namespace APICarreteras.Controllers
                     return BadRequest(ModelState);
                 }
 
-                /*var existingCanton = await _tipodeviaRepo.Obtener(v => v.TipoDeVia.ToLower() == createDto.TipoDeVia.ToLower());
-                if (existingCanton != null)
-                {
-                    ModelState.AddModelError("NombreExiste", "El tipo de via con ese nombre ya existe.");
-                    return BadRequest(ModelState);
-                }*/
-
                 TipoDeVium modelo = _mapper.Map<TipoDeVium>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;

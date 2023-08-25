@@ -12,7 +12,6 @@ public partial class Curva
     [Key]
     [Column("ID_CURVAS")]
     public int IdCurvas { get; set; }
-
     [Column("ID_TRAMO")]
     public int? IdTramo { get; set; }
 

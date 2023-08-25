@@ -48,6 +48,14 @@ builder.Services.AddScoped<ITramoRepositorio, TramoRepositorio>();
 builder.Services.AddScoped<IAlcantarilladoRepositorio, AlcantarilladoRepositorio>();
 builder.Services.AddScoped<IAccesorioRepositorio, AccesorioRepositorio>();
 builder.Services.AddScoped<IPuenteRepositorio,  PuenteRepositorio>();
+builder.Services.AddScoped<ITaludRepositorio, TaludRepositorio>();
+builder.Services.AddScoped<ICurvaRepositorio, CurvaRepositorio>();
+builder.Services.AddScoped<ICunetaRepositorio, CunetaRepositorio>();
+builder.Services.AddScoped<ITuneleRepositorio, TunelesRepositorio>();
+builder.Services.AddScoped<IiluminacionRepositorio, IluminacionRepositorio>();
+builder.Services.AddScoped<IServicioRepositorio, ServicioRepositorio>();
+builder.Services.AddScoped<ICamaraDeSeguridadRepositorio, CamaraDeSeguridadRepositorio>();
+
 
 builder.Services.AddCors(options =>
 {

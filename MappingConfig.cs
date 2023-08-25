@@ -1,5 +1,6 @@
 ﻿using APICarreteras.Models;
 using APICarreteras.Models.Dto;
+using APICarreteras.Repository;
 using AutoMapper;
 
 
@@ -40,6 +41,33 @@ namespace APICarreteras
             CreateMap<Puente, PuenteCreateDto>().ReverseMap();
             CreateMap<Puente, PuenteUpdateDto>().ReverseMap();
             
+            CreateMap<Talud,  TaludDto>().ReverseMap();
+            CreateMap<Talud, TaludCreateDto>().ReverseMap();
+            CreateMap<Talud, TaludUpdateDto>().ReverseMap();
+
+            CreateMap<Curva, CurvaDto>().ReverseMap();
+            CreateMap<Curva, CurvaCreateDto>().ReverseMap();
+            CreateMap<Curva, CurvaUpdateDto>().ReverseMap();
+
+            CreateMap<Cunetum, CunetaDto>().ReverseMap();
+            CreateMap<Cunetum, CunetaCreateDto>().ReverseMap();
+            CreateMap<Cunetum, CunetaUpdateDto>().ReverseMap();
+
+            CreateMap<Tunele, TunelesDto>().ReverseMap();
+            CreateMap<Tunele, TunelesCreateDto>().ReverseMap();
+            CreateMap<Tunele, TunelesUpdateDto>().ReverseMap();
+
+            CreateMap<Iluminacion, IluminacionDto>().ReverseMap();
+            CreateMap<Iluminacion, IluminacionCreateDto>().ReverseMap();
+            CreateMap<Iluminacion, IluminacionUpdateDto>().ReverseMap();
+
+            CreateMap<Servicio, ServiciosDto>().ReverseMap();
+            CreateMap<Servicio, ServicioCreateDto>().ReverseMap();
+            CreateMap<Servicio, ServicioUpdateDto>().ReverseMap();
+
+            CreateMap<CamarasDeSeguridad, CamarasDeSeguridadDto>().ReverseMap();
+            CreateMap<CamarasDeSeguridad, CamarasDeSeguridadCreateDto>().ReverseMap();
+            CreateMap<CamarasDeSeguridad, CamarasDeSeguridadUpdateDto>().ReverseMap();
 
         }
     }

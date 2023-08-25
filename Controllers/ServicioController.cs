@@ -19,31 +19,30 @@ namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PuenteController : ControllerBase
+    public class ServicioController : ControllerBase
     {
-        private readonly ILogger<PuenteController> _logger;
-        private readonly IPuenteRepositorio _puenteRepo;
+        private readonly ILogger<ServicioController> _logger;
+        private readonly IServicioRepositorio _servicioRepo;
         private readonly IMapper _mapper;
-        private readonly ITramoRepositorio _tramoRepositorio;
         protected Response _response;
-        public PuenteController(ILogger<PuenteController> logger, IPuenteRepositorio puenteRepo, ITramoRepositorio tramoRepositorio, IMapper mapper)
+
+        public ServicioController(ILogger<ServicioController> logger, IServicioRepositorio servicioRepo, IMapper mapper)
         {
             _logger = logger;
-            _puenteRepo = puenteRepo;
-            _tramoRepositorio = tramoRepositorio;
+            _servicioRepo = servicioRepo;
             _mapper = mapper;
             _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetPuentes()
+        public async Task<ActionResult<Response>> GetServicio()
         {
             try
             {
-                _logger.LogInformation("Obtener los puentes");
-                IEnumerable<Puente> puenteList = await _puenteRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<PuenteDto>>(puenteList);
+                _logger.LogInformation("Obtener los servicios");
+                IEnumerable<Servicio> servicioList = await _servicioRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<ServiciosDto>>(servicioList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -56,31 +55,31 @@ namespace APICarreteras.Controllers
 
         }
 
-        [HttpGet("{id:int}", Name = "GetPuente")]
+        [HttpGet("{id:int}", Name = "GetServicio")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetPuente(int id)
+        public async Task<ActionResult<Response>> GetServicio(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer Puente con Id " + id);
+                    _logger.LogError("Error al traer Servicio con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var puente = await _puenteRepo.Obtener(c => c.IdPuente == id);
-                if (puente == null)
+                var servicio = await _servicioRepo.Obtener(c => c.IdUbicacion == id);
+                if (servicio == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<PuenteDto>(puente);
+                _response.Resultado = _mapper.Map<ServiciosDto>(servicio);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -95,57 +94,44 @@ namespace APICarreteras.Controllers
 
         }
 
-
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearPuente([FromBody] PuenteCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearServicio([FromBody] ServicioCreateDto createDto)
         {
             try
             {
+                if (createDto == null)
+                {
+                    return BadRequest("El objeto createDto es nulo.");
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-                var existingPuente = await _puenteRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower());
-                if (existingPuente != null)
-                {
-                    ModelState.AddModelError("NombreExiste", "El puente con ese nombre ya existe.");
-                    return BadRequest(ModelState);
-                }
 
-                if (await _tramoRepositorio.Obtener(v => v.IdTramo == createDto.IdTramo) == null)
-                {
-                    ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
-                    return BadRequest(ModelState);
-                }
+              
 
-                
-                if (createDto == null)
-                {
-                    return BadRequest(createDto);
-                }
-                Puente modelo = _mapper.Map<Puente>(createDto);
+                Servicio modelo = _mapper.Map<Servicio>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
-
-                await _puenteRepo.Crear(modelo);
+                await _servicioRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetPuente", new { id = modelo.IdPuente }, _response);
+                return CreatedAtRoute("GetServicio", new { id = modelo.IdUbicacion }, _response);
             }
             catch (Exception ex)
             {
-
                 _response.IsExitoso = false;
-                _response.ErrorMessages = new List<string>() { ex.ToString() };
-
-
+                _response.ErrorMessages = new List<string>() { ex.Message };
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
-            return _response;
+
+
         }
 
         [HttpDelete("{id:int}")]
@@ -153,7 +139,7 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<IActionResult> DeleteCurva(int id)
+        public async Task<IActionResult> DeleteServicio(int id)
         {
             try
             {
@@ -163,14 +149,14 @@ namespace APICarreteras.Controllers
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var puente = await _puenteRepo.Obtener(v => v.IdPuente == id);
-                if (puente == null)
+                var talud = await _servicioRepo.Obtener(v => v.IdUbicacion == id);
+                if (talud == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _puenteRepo.Remover(puente);
+                await _servicioRepo.Remover(talud);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -187,29 +173,24 @@ namespace APICarreteras.Controllers
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdatePuente(int id, [FromBody] PuenteUpdateDto updateDto)
+        public async Task<IActionResult> UpdateServicio(int id, [FromBody] ServicioUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdPuente)
+            if (updateDto == null || id != updateDto.IdUbicacion)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
                 return BadRequest(_response);
             }
 
-           
-            if (await _tramoRepositorio.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
-            {
-                ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
-                return BadRequest(ModelState);
-            }
-           
 
-            Puente modelo = _mapper.Map<Puente>(updateDto);
+            Servicio modelo = _mapper.Map<Servicio>(updateDto);
 
-            await _puenteRepo.Actualizar(modelo);
+            await _servicioRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
+
+
 
 
 

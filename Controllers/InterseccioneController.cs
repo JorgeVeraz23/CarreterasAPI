@@ -15,24 +15,23 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using APICarreteras.Controller;
 
 namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TunelesController : ControllerBase
+    public class InterseccioneController : ControllerBase
     {
-        private readonly ILogger<TunelesController> _logger;
-        private readonly ITuneleRepositorio _tuneleRepo;
-        private readonly ITramoRepositorio _tramoRepo;
+        private readonly ILogger<InterseccioneController> _logger;
+        private readonly IInterseccioneRepositorio _interseccioneRepo;
         private readonly IMapper _mapper;
+        private readonly ITramoRepositorio _tramoRepo;
         protected Response _response;
 
-        public TunelesController(ILogger<TunelesController> logger, ITuneleRepositorio tuneleRepo, ITramoRepositorio tramoRepo, IMapper mapper)
+        public InterseccioneController(ILogger<InterseccioneController> logger, IInterseccioneRepositorio interseccioneRepo, ITramoRepositorio tramoRepo, IMapper mapper)
         {
             _logger = logger;
-            _tuneleRepo = tuneleRepo;
+            _interseccioneRepo = interseccioneRepo;
             _tramoRepo = tramoRepo;
             _mapper = mapper;
             _response = new();
@@ -40,13 +39,13 @@ namespace APICarreteras.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetTunele()
+        public async Task<ActionResult<Response>> GetInterseccione()
         {
             try
             {
-                _logger.LogInformation("Obtener los tuneles");
-                IEnumerable<Tunele> tunelesList = await _tuneleRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<TunelesDto>>(tunelesList);
+                _logger.LogInformation("Obtener las intersecciones");
+                IEnumerable<Interseccione> interseccioneList = await _interseccioneRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<InterseccioneDto>>(interseccioneList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -59,32 +58,31 @@ namespace APICarreteras.Controllers
 
         }
 
-
-        [HttpGet("{id:int}", Name = "GetTuneles")]
+        [HttpGet("{id:int}", Name = "GetInterseccione")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetTuneles(int id)
+        public async Task<ActionResult<Response>> GetInterseccione(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer el Tuneles con Id " + id);
+                    _logger.LogError("Error al traer Intersecciones con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var tuneles = await _tuneleRepo.Obtener(c => c.IdTunel == id);
-                if (tuneles == null)
+                var interseccione = await _interseccioneRepo.Obtener(c => c.IdIntersecciones == id);
+                if (interseccione == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<TunelesDto>(tuneles);
+                _response.Resultado = _mapper.Map<InterseccioneDto>(interseccione);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -103,7 +101,7 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearTuneles([FromBody] TunelesCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearInterseccione([FromBody] InterseccioneCreateDto createDto)
         {
             try
             {
@@ -124,16 +122,16 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(createDto);
                 }
-                Tunele modelo = _mapper.Map<Tunele>(createDto);
+                Interseccione modelo = _mapper.Map<Interseccione>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
 
-                await _tuneleRepo.Crear(modelo);
+                await _interseccioneRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetTuneles", new { id = modelo.IdTunel }, _response);
+                return CreatedAtRoute("GetInterseccione", new { id = modelo.IdIntersecciones }, _response);
             }
             catch (Exception ex)
             {
@@ -152,7 +150,7 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<IActionResult> DeleteTuneles(int id)
+        public async Task<IActionResult> DeleteInterseccione(int id)
         {
             try
             {
@@ -162,14 +160,14 @@ namespace APICarreteras.Controllers
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var tuneles = await _tuneleRepo.Obtener(v => v.IdTunel == id);
-                if (tuneles == null)
+                var interseccione = await _interseccioneRepo.Obtener(v => v.IdIntersecciones == id);
+                if (interseccione == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _tuneleRepo.Remover(tuneles);
+                await _interseccioneRepo.Remover(interseccione);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -182,13 +180,12 @@ namespace APICarreteras.Controllers
             }
         }
 
-
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateTunele(int id, [FromBody] TunelesUpdateDto updateDto)
+        public async Task<IActionResult> UpdateInterseccione(int id, [FromBody] InterseccioneUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdTunel)
+            if (updateDto == null || id != updateDto.IdIntersecciones)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
@@ -203,17 +200,11 @@ namespace APICarreteras.Controllers
             }
 
 
-            Tunele modelo = _mapper.Map<Tunele>(updateDto);
+            Interseccione modelo = _mapper.Map<Interseccione>(updateDto);
 
-            await _tuneleRepo.Actualizar(modelo);
+            await _interseccioneRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
-
-
-
-
-
-
     }
 }

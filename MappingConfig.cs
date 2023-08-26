@@ -69,6 +69,19 @@ namespace APICarreteras
             CreateMap<CamarasDeSeguridad, CamarasDeSeguridadCreateDto>().ReverseMap();
             CreateMap<CamarasDeSeguridad, CamarasDeSeguridadUpdateDto>().ReverseMap();
 
+            CreateMap<TipoRodadura, TipoRodaduraDto>().ReverseMap();
+            CreateMap<TipoRodadura, TipoRodaduraCreateDto>().ReverseMap();
+            CreateMap<TipoRodadura, TipoRodaduraUpdateDto>().ReverseMap();
+
+            CreateMap<Interseccione, InterseccioneDto>().ReverseMap();
+            CreateMap<Interseccione, InterseccioneCreateDto>().ReverseMap();
+            CreateMap<Interseccione, InterseccioneUpdateDto>().ReverseMap();
+
+            CreateMap<Dano, DanoDto>().ReverseMap();
+            CreateMap<Dano, DanoCreateDto>().ReverseMap();
+            CreateMap<Dano, DanoUpdateDto>().ReverseMap();
+
+
         }
     }
 }

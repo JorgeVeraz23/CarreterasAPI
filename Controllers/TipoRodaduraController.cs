@@ -15,24 +15,23 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using APICarreteras.Controller;
 
 namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TunelesController : ControllerBase
+    public class TipoRodaduraController : ControllerBase
     {
-        private readonly ILogger<TunelesController> _logger;
-        private readonly ITuneleRepositorio _tuneleRepo;
+        private readonly ILogger<TipoRodaduraController> _logger;
+        private readonly ITipoRodaduraRepositorio _tiporodaduraRepo;
         private readonly ITramoRepositorio _tramoRepo;
         private readonly IMapper _mapper;
         protected Response _response;
 
-        public TunelesController(ILogger<TunelesController> logger, ITuneleRepositorio tuneleRepo, ITramoRepositorio tramoRepo, IMapper mapper)
+        public TipoRodaduraController(ILogger<TipoRodaduraController> logger, ITipoRodaduraRepositorio tiporodaduraRepo, ITramoRepositorio tramoRepo, IMapper mapper)
         {
             _logger = logger;
-            _tuneleRepo = tuneleRepo;
+            _tiporodaduraRepo = tiporodaduraRepo;
             _tramoRepo = tramoRepo;
             _mapper = mapper;
             _response = new();
@@ -40,13 +39,13 @@ namespace APICarreteras.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetTunele()
+        public async Task<ActionResult<Response>> GetTipoRodadura()
         {
             try
             {
-                _logger.LogInformation("Obtener los tuneles");
-                IEnumerable<Tunele> tunelesList = await _tuneleRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<TunelesDto>>(tunelesList);
+                _logger.LogInformation("Obtener los tipos de rodadura");
+                IEnumerable<TipoRodadura> tiporodaduraList = await _tiporodaduraRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<TipoRodaduraDto>>(tiporodaduraList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -59,32 +58,31 @@ namespace APICarreteras.Controllers
 
         }
 
-
-        [HttpGet("{id:int}", Name = "GetTuneles")]
+        [HttpGet("{id:int}", Name = "GetTipoRodadura")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetTuneles(int id)
+        public async Task<ActionResult<Response>> GetTipoRodadura(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer el Tuneles con Id " + id);
+                    _logger.LogError("Error al traer el Tipo de rodadura con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var tuneles = await _tuneleRepo.Obtener(c => c.IdTunel == id);
-                if (tuneles == null)
+                var tiporodadura = await _tiporodaduraRepo.Obtener(c => c.IdTipoRodadura == id);
+                if (tiporodadura == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<TunelesDto>(tuneles);
+                _response.Resultado = _mapper.Map<TipoRodaduraDto>(tiporodadura);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -103,7 +101,7 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearTuneles([FromBody] TunelesCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearTipoRodadura([FromBody] TipoRodaduraCreateDto createDto)
         {
             try
             {
@@ -115,7 +113,7 @@ namespace APICarreteras.Controllers
 
                 if (await _tramoRepo.Obtener(v => v.IdTramo == createDto.IdTramo) == null)
                 {
-                    ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
+                    ModelState.AddModelError("ClaveForanea", "El Id de tipo de tramo no existe");
                     return BadRequest(ModelState);
                 }
 
@@ -124,16 +122,16 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(createDto);
                 }
-                Tunele modelo = _mapper.Map<Tunele>(createDto);
+                TipoRodadura modelo = _mapper.Map<TipoRodadura>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
 
-                await _tuneleRepo.Crear(modelo);
+                await _tiporodaduraRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetTuneles", new { id = modelo.IdTunel }, _response);
+                return CreatedAtRoute("GetTipoRodadura", new { id = modelo.IdTipoRodadura }, _response);
             }
             catch (Exception ex)
             {
@@ -146,13 +144,12 @@ namespace APICarreteras.Controllers
             return _response;
         }
 
-
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
 
-        public async Task<IActionResult> DeleteTuneles(int id)
+        public async Task<IActionResult> DeleteTipoRodadura(int id)
         {
             try
             {
@@ -162,14 +159,14 @@ namespace APICarreteras.Controllers
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var tuneles = await _tuneleRepo.Obtener(v => v.IdTunel == id);
-                if (tuneles == null)
+                var tiporodadura = await _tiporodaduraRepo.Obtener(v => v.IdTipoRodadura == id);
+                if (tiporodadura == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _tuneleRepo.Remover(tuneles);
+                await _tiporodaduraRepo.Remover(tiporodadura);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -182,13 +179,12 @@ namespace APICarreteras.Controllers
             }
         }
 
-
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateTunele(int id, [FromBody] TunelesUpdateDto updateDto)
+        public async Task<IActionResult> UpdateTipoRodadura(int id, [FromBody] TipoRodaduraUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdTunel)
+            if (updateDto == null || id != updateDto.IdTipoRodadura)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
@@ -198,22 +194,17 @@ namespace APICarreteras.Controllers
 
             if (await _tramoRepo.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
             {
-                ModelState.AddModelError("ClaveForanea", "El Id de tramo no existe");
+                ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
                 return BadRequest(ModelState);
             }
 
 
-            Tunele modelo = _mapper.Map<Tunele>(updateDto);
+            TipoRodadura modelo = _mapper.Map<TipoRodadura>(updateDto);
 
-            await _tuneleRepo.Actualizar(modelo);
+            await _tiporodaduraRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
-
-
-
-
-
 
     }
 }

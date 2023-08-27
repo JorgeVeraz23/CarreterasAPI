@@ -20,32 +20,33 @@ namespace APICarreteras.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CamaraDeSeguridadController : ControllerBase
+    public class CostoReparacionController : ControllerBase
     {
-        private readonly ILogger<CamaraDeSeguridadController> _logger;
-        private readonly ICamaraDeSeguridadRepositorio _camaradeseguridadRepo;
+
+        private readonly ILogger<CostoReparacionController> _logger;
+        private readonly ICostoReparacionRepositorio _costoreparacionRepo;
         private readonly IMapper _mapper;
-        private readonly ITramoRepositorio _tramoRepo;
+        private readonly IDanosRepositorio _danoRepo;
         protected Response _response;
 
-        public CamaraDeSeguridadController(ILogger<CamaraDeSeguridadController> logger, ICamaraDeSeguridadRepositorio camaradeseguridadRepo, ITramoRepositorio tramoRepo, IMapper mapper)
+        public CostoReparacionController(ILogger<CostoReparacionController> logger, ICostoReparacionRepositorio costoreparacionRepo, IDanosRepositorio danoRepositorio, IMapper mapper)
         {
             _logger = logger;
-            _camaradeseguridadRepo = camaradeseguridadRepo;
-            _tramoRepo = tramoRepo;
+            _costoreparacionRepo = costoreparacionRepo;
+            _danoRepo = danoRepositorio;
             _mapper = mapper;
             _response = new();
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Response>> GetCamaraDeSeguridad()
+        public async Task<ActionResult<Response>> GetCostoReparaciom()
         {
             try
             {
-                _logger.LogInformation("Obtener las camaras de seguridad");
-                IEnumerable<CamarasDeSeguridad> camaradeseguridadList = await _camaradeseguridadRepo.ObtenerTodos();
-                _response.Resultado = _mapper.Map<IEnumerable<CamarasDeSeguridadDto>>(camaradeseguridadList);
+                _logger.LogInformation("Obtener los costos de reparaciom");
+                IEnumerable<CostoReparacion> costoreparacionList = await _costoreparacionRepo.ObtenerTodos();
+                _response.Resultado = _mapper.Map<IEnumerable<CostoReparacionDto>>(costoreparacionList);
                 _response.statusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -58,31 +59,31 @@ namespace APICarreteras.Controllers
 
         }
 
-        [HttpGet("{id:int}", Name = "GetCamarasDeSeguridad")]
+        [HttpGet("{id:int}", Name = "GetCostoReparacion")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Response>> GetCamaraDeSeguridad(int id)
+        public async Task<ActionResult<Response>> GetCostoReparacion(int id)
         {
             try
             {
                 if (id == 0)
                 {
-                    _logger.LogError("Error al traer las camaras de seguridad con Id " + id);
+                    _logger.LogError("Error al traer costo de reparacion con Id " + id);
                     _response.statusCode = HttpStatusCode.BadRequest;
                     _response.IsExitoso = false;
                     return BadRequest(_response);
                 }
 
-                var camaradeseguridad = await _camaradeseguridadRepo.Obtener(c => c.IdCamara == id);
-                if (camaradeseguridad == null)
+                var costoreparacion = await _costoreparacionRepo.Obtener(c => c.IdCostoReparacion == id);
+                if (costoreparacion == null)
                 {
                     _response.statusCode = HttpStatusCode.NotFound;
                     _response.IsExitoso = false;
                     return NotFound(_response);
                 }
 
-                _response.Resultado = _mapper.Map<CamarasDeSeguridadDto>(camaradeseguridad);
+                _response.Resultado = _mapper.Map<CostoReparacionDto>(costoreparacion);
                 _response.statusCode = HttpStatusCode.OK;
 
                 return Ok(_response);
@@ -97,12 +98,11 @@ namespace APICarreteras.Controllers
 
         }
 
-
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response>> CrearCamaraDeSeguridad([FromBody] CamarasDeSeguridadCreateDto createDto)
+        public async Task<ActionResult<Response>> CrearCostoReparacion([FromBody] CostoReparacionCreateDto createDto)
         {
             try
             {
@@ -112,9 +112,9 @@ namespace APICarreteras.Controllers
                 }
 
 
-                if (await _tramoRepo.Obtener(v => v.IdTramo == createDto.IdTramo) == null)
+                if (await _danoRepo.Obtener(v => v.IdDanos == createDto.IdDanos) == null)
                 {
-                    ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
+                    ModelState.AddModelError("ClaveForanea", "El Id de daño no existe");
                     return BadRequest(ModelState);
                 }
 
@@ -123,16 +123,16 @@ namespace APICarreteras.Controllers
                 {
                     return BadRequest(createDto);
                 }
-                CamarasDeSeguridad modelo = _mapper.Map<CamarasDeSeguridad>(createDto);
+                CostoReparacion modelo = _mapper.Map<CostoReparacion>(createDto);
                 modelo.FechaCreacion = DateTime.Now;
                 modelo.FechaActualizacion = DateTime.Now;
 
 
-                await _camaradeseguridadRepo.Crear(modelo);
+                await _costoreparacionRepo.Crear(modelo);
                 _response.Resultado = modelo;
                 _response.statusCode = HttpStatusCode.Created;
 
-                return CreatedAtRoute("GetCamarasDeSeguridad", new { id = modelo.IdCamara }, _response);
+                return CreatedAtRoute("GetCostoReparacion", new { id = modelo.IdCostoReparacion }, _response);
             }
             catch (Exception ex)
             {
@@ -149,7 +149,8 @@ namespace APICarreteras.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteCamaraDeSeguridad(int id)
+
+        public async Task<IActionResult> DeleteCostoReparacion(int id)
         {
             try
             {
@@ -159,14 +160,14 @@ namespace APICarreteras.Controllers
                     _response.statusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
-                var camaradeseguridad = await _camaradeseguridadRepo.Obtener(v => v.IdCamara == id);
-                if (camaradeseguridad == null)
+                var costoreparacion = await _costoreparacionRepo.Obtener(v => v.IdCostoReparacion == id);
+                if (costoreparacion == null)
                 {
                     _response.IsExitoso = false;
                     _response.statusCode = HttpStatusCode.NotFound;
                     return NotFound(_response);
                 }
-                await _camaradeseguridadRepo.Remover(camaradeseguridad);
+                await _costoreparacionRepo.Remover(costoreparacion);
                 _response.statusCode = HttpStatusCode.NoContent;
                 return BadRequest(_response);
             }
@@ -182,9 +183,9 @@ namespace APICarreteras.Controllers
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateCamaraDeSeguridad(int id, [FromBody] CamarasDeSeguridadUpdateDto updateDto)
+        public async Task<IActionResult> UpdateCostoReparacion(int id, [FromBody] CostoReparacionUpdateDto updateDto)
         {
-            if (updateDto == null || id != updateDto.IdCamara)
+            if (updateDto == null || id != updateDto.IdCostoReparacion)
             {
                 _response.IsExitoso = false;
                 _response.statusCode = HttpStatusCode.BadRequest;
@@ -192,21 +193,21 @@ namespace APICarreteras.Controllers
             }
 
 
-            if (await _tramoRepo.Obtener(v => v.IdTramo == updateDto.IdTramo) == null)
+            if (await _danoRepo.Obtener(v => v.IdDanos == updateDto.IdDanos) == null)
             {
-                ModelState.AddModelError("ClaveForanea", "El Id de Tramo no existe");
+                ModelState.AddModelError("ClaveForanea", "El Id de daño no existe");
                 return BadRequest(ModelState);
             }
 
 
-            CamarasDeSeguridad modelo = _mapper.Map<CamarasDeSeguridad>(updateDto);
+            CostoReparacion modelo = _mapper.Map<CostoReparacion>(updateDto);
 
-            await _camaradeseguridadRepo.Actualizar(modelo);
+            await _costoreparacionRepo.Actualizar(modelo);
             _response.statusCode = HttpStatusCode.NoContent;
             return Ok(_response);
         }
 
+
+
     }
-
-
 }

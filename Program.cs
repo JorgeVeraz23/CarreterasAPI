@@ -58,6 +58,9 @@ builder.Services.AddScoped<ICamaraDeSeguridadRepositorio, CamaraDeSeguridadRepos
 builder.Services.AddScoped<ITipoRodaduraRepositorio, TipoRodaduraRepositorio>();
 builder.Services.AddScoped<IInterseccioneRepositorio, InterseccioneRepositorio>();
 builder.Services.AddScoped<IDanosRepositorio, DanoRepositorio>();
+builder.Services.AddScoped<ICarreteraDetalleRepositorio, CarreteraDetalleRepositorio>();
+builder.Services.AddScoped<ICostoReparacionRepositorio, CostoReparacionRepositorio>();
+builder.Services.AddScoped<ICalendarioDeActuacionesRepositorio, CalendarioDeActuacionesRepositorio>();
 
 builder.Services.AddCors(options =>
 {

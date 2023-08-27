@@ -81,6 +81,18 @@ namespace APICarreteras
             CreateMap<Dano, DanoCreateDto>().ReverseMap();
             CreateMap<Dano, DanoUpdateDto>().ReverseMap();
 
+            CreateMap<CarreteraDetalle, CarreteraDetalleDto>().ReverseMap();
+            CreateMap<CarreteraDetalle, CarreteraDetalleCreateDto>().ReverseMap();
+            CreateMap<CarreteraDetalle, CarreteraDetalleUpdateDto>().ReverseMap();
+
+            CreateMap<CostoReparacion, CostoReparacionDto>().ReverseMap();
+            CreateMap<CostoReparacion, CostoReparacionCreateDto>().ReverseMap();
+            CreateMap<CostoReparacion, CostoReparacionUpdateDto>().ReverseMap();
+
+            CreateMap<CalendarioDeActuacione, CalendarioDeActuacionesDto>().ReverseMap();
+            CreateMap<CalendarioDeActuacione, CalendarioDeActuacionesCreateDto>().ReverseMap();
+            CreateMap<CalendarioDeActuacione, CalendarioDeActuacionesUpdateDto>().ReverseMap();
+
 
         }
     }
